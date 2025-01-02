@@ -173,7 +173,7 @@ func readFromSheet() ([]MessageRow, error) {
 
     // Define the range that you want to read. For example, "Sheet1!A2:B"
     // A2:B means: start at row 2 (skip headers) in columns A and B.
-    readRange := "Sheet1!A2:B"
+    readRange := "Sheet1!A2:C"
 
     resp, err := srv.Spreadsheets.Values.Get(spreadsheetID, readRange).Context(ctx).Do()
     if err != nil {
