@@ -21,6 +21,7 @@ type FormDataPass struct {
 type MessageRow struct {
     Name    string `json:"name"`
     Message string `json:"message"`
+    Date    string `json:"date"`
 }
 
 type FormData struct {
@@ -91,6 +92,7 @@ func main() {
             {
                 data.Name,
                 data.Message,
+                data.Date,
             },
         }
         err := appendToSheet(values, os.Getenv("SPREADSHEET_MESSAGES_ID"))
@@ -184,7 +186,7 @@ func readFromSheet() ([]MessageRow, error) {
     // Convert them into our MessageRow struct.
     for _, row := range resp.Values {
         // In case some row is missing columns, handle gracefully
-        var name, message string
+        var name, message, date string
 
         if len(row) > 0 {
             name, _ = row[0].(string)
@@ -192,8 +194,11 @@ func readFromSheet() ([]MessageRow, error) {
         if len(row) > 1 {
             message, _ = row[1].(string)
         }
+        if len(row) > 2 {
+            date, _ = row[2].(string)
+        }
 
-        result = append(result, MessageRow{Name: name, Message: message})
+        result = append(result, MessageRow{Name: name, Message: message, Date: date})
     }
 
     return result, nil
