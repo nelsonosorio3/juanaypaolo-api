@@ -9,6 +9,7 @@ import (
     "os"
 
     "github.com/gin-gonic/gin"
+    "github.com/gin-contrib/cors"
     "google.golang.org/api/option"
     "google.golang.org/api/sheets/v4"
 )
@@ -34,6 +35,14 @@ type FormData struct {
 
 func main() {
     router := gin.Default()
+
+    router.Use(cors.New(cors.Config{
+        AllowOrigins:     []string{"*"},
+        AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+        AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+        ExposeHeaders:    []string{"Content-Length"},
+        AllowCredentials: false,
+    }))
 
     router.POST("/pass", func(c *gin.Context) {
         var data FormDataPass
