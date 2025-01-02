@@ -114,7 +114,7 @@ func main() {
                 data.Attendance,
                 data.PlusOne,
                 data.PlusOneName,
-                data.Food
+                data.Food,
             },
         }
         err := appendToSheet(values, os.Getenv("SPREADSHEET_ID"))
