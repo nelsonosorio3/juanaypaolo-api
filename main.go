@@ -28,7 +28,7 @@ type FormData struct {
     Email   string `json:"email"`
     Attendance string `json:"attendance"`
     PlusOne string `json:"plusOne"`
-    PlusOneName string `json:"plusOne"`
+    PlusOneName string `json:"plusOneName"`
     Food string `json:"food"`
 }
 
