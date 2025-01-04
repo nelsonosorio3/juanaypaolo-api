@@ -33,6 +33,12 @@ type FormData struct {
     Food string `json:"food"`
 }
 
+type CalendarRow struct {
+    Title string `json:"title"`
+    Date string `json:"date"`
+    Details string `json:"details"`
+}
+
 
 func main() {
     router := gin.Default()
@@ -140,6 +146,19 @@ func main() {
         c.JSON(http.StatusOK, gin.H{"status": "success"})
     })
 
+    router.GET("/calendar", func(c *gin.Context) {
+        query := c.Query("lang")
+        rows, err := readCalendarFromSheet(query)
+        if err != nil {
+            log.Println("Error reading from sheet:", err)
+            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+            return
+        }
+
+        // Return the array of JSON objects
+        c.JSON(http.StatusOK, rows)
+    })
+
     // Start the server on PORT (Render sets PORT automatically)
     port := os.Getenv("PORT")
     if port == "" {
@@ -199,6 +218,60 @@ func readFromSheet() ([]MessageRow, error) {
         }
 
         result = append(result, MessageRow{Name: name, Message: message, Date: date})
+    }
+
+    return result, nil
+}
+
+func readCalendarFromSheet(query string) ([]CalendarRow, error) {
+    // Retrieve environment variables
+    credsEncoded := os.Getenv("GOOGLE_CREDENTIALS") // base64-encoded JSON
+    spreadsheetID := os.Getenv("SPREADSHEET_CALENDAR_ID")
+    if credsEncoded == "" || spreadsheetID == "" {
+        return nil, fmt.Errorf("environment variables GOOGLE_CREDENTIALS or SPREADSHEET_ID not set")
+    }
+
+    // Decode the credentials
+    credsJSON, err := base64.StdEncoding.DecodeString(credsEncoded)
+    if err != nil {
+        return nil, fmt.Errorf("failed to decode credentials: %v", err)
+    }
+
+    // Create a Sheets service client
+    ctx := context.Background()
+    srv, err := sheets.NewService(ctx, option.WithCredentialsJSON(credsJSON))
+    if err != nil {
+        return nil, fmt.Errorf("unable to create sheets client: %v", err)
+    }
+
+    // Define the range that you want to read. For example, "Sheet1!A2:B"
+    // A2:B means: start at row 2 (skip headers) in columns A and B.
+    readRange := query + "!A2:C"
+
+    resp, err := srv.Spreadsheets.Values.Get(spreadsheetID, readRange).Context(ctx).Do()
+    if err != nil {
+        return nil, fmt.Errorf("unable to retrieve data from sheet: %v", err)
+    }
+
+    var result []CalendarRow
+
+    // Each row in resp.Values is a []interface{}, e.g. ["jane", "hi!"]
+    // Convert them into our MessageRow struct.
+    for _, row := range resp.Values {
+        // In case some row is missing columns, handle gracefully
+        var title, date, details string
+
+        if len(row) > 0 {
+            title, _ = row[0].(string)
+        }
+        if len(row) > 1 {
+            date, _ = row[1].(string)
+        }
+        if len(row) > 2 {
+            details, _ = row[2].(string)
+        }
+
+        result = append(result, CalendarRow{Title: title, Date: date, Details: details})
     }
 
     return result, nil
