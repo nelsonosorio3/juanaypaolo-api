@@ -27,9 +27,12 @@ type MessageRow struct {
 type FormData struct {
     Name    string `json:"name"`
     Email   string `json:"email"`
+    Phone string `json:"phone"`
     Attendance string `json:"attendance"`
     PlusOne string `json:"plusOne"`
     PlusOneName string `json:"plusOneName"`
+    WelcomeParty string `json:"welcomePart"`
+    PlusOneWelcomeParty string `json:"plusOneWelcomeParty"`
     Food string `json:"food"`
 }
 
@@ -128,9 +131,12 @@ func main() {
             {
                 data.Name,
                 data.Email,
+                data.Phone,
                 data.Attendance,
                 data.PlusOne,
                 data.PlusOneName,
+                data.WelcomeParty,
+                data.PlusOneWelcomeParty,
                 data.Food,
             },
         }
